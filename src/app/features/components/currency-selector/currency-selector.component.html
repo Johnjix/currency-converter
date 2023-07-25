@@ -1,0 +1,28 @@
+<div class="input-group" ngbDropdown #myDrop="ngbDropdown">
+  <button
+    type="button"
+    class="btn btn-primary"
+    id="dropdownManual"
+    ngbTooltip="{{ name }}"
+    ngbDropdownAnchor
+    (focus)="myDrop.open()"
+  >
+    {{ !symbol ? "Select " + title : symbol }}
+  </button>
+  <div ngbDropdownMenu>
+    <button
+      *ngFor="let cur of currencies | keyvalue"
+      ngbDropdownItem
+      (click)="setCurrency(cur.key, cur.value)"
+    >
+      {{ cur.key }} - {{ cur.value }}
+    </button>
+  </div>
+  <input
+    class="form-control currency-value-input"
+    type="number"
+    [min]="0"
+    [(ngModel)]="amount"
+    (ngModelChange)="emitAmount()"
+  />
+</div>

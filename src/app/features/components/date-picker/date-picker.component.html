@@ -1,0 +1,23 @@
+<form class="row row-cols-sm-auto">
+  <div class="col-12">
+    <div class="input-group">
+      <input
+        class="form-control"
+        placeholder="yyyy-mm-dd"
+        name="dp"
+        [(ngModel)]="date"
+        (ngModelChange)="emitDate($event)"
+        ngbDatepicker
+        #d="ngbDatepicker"
+      />
+      <button
+        class="btn btn-outline-secondary bi bi-calendar3"
+        (click)="d.toggle()"
+        type="button"
+        ngbTooltip="Select date to get conversion rates"
+      >
+        <i class="fa-solid fa-calendar-days"></i>
+      </button>
+    </div>
+  </div>
+</form>

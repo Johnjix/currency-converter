@@ -1,0 +1,50 @@
+<mat-card class="mat-elevation-z8 mt-3">
+  <mat-card-header>
+    <mat-card-title>Convert Currency</mat-card-title>
+  </mat-card-header>
+  <mat-card-content>
+    <p>
+      Select currencies to convert to and from, as well as the date to get the
+      historical rate on that date.
+    </p>
+    <div class="row mb-2">
+      <div class="col">
+        <app-date-picker (dateChange)="onDateChange($event)"></app-date-picker>
+      </div>
+    </div>
+    <div class="row mb-2">
+      <div class="col d-flex justify-content-between">
+        <app-currency-selector
+          [currencies]="(currencies$ | async) ?? {}"
+          [(symbol)]="symbolLeft"
+          (symbolChange)="
+            getCurrencyConversion(symbolLeft, symbolRight, amountLeft, date)
+          "
+          [(amount)]="amountLeft"
+          (amountChange)="
+            getCurrencyConversion(symbolLeft, symbolRight, amountLeft, date)
+          "
+        ></app-currency-selector>
+        <div class="d-flex align-items-center">
+          <i class="fa-solid fa-left-right fa-2xl"></i>
+        </div>
+        <app-currency-selector
+          [currencies]="(currencies$ | async) ?? {}"
+          [title]="'Target'"
+          [(symbol)]="symbolRight"
+          (symbolChange)="
+            getCurrencyConversion(symbolRight, symbolLeft, amountLeft, date)
+          "
+          [(amount)]="amountRight"
+          (amountChange)="
+            getCurrencyConversion(symbolRight, symbolLeft, amountLeft, date)
+          "
+        ></app-currency-selector>
+      </div>
+    </div>
+  </mat-card-content>
+  <mat-card-footer>
+    <mat-progress-bar [mode]="progressBarMode"></mat-progress-bar>
+  </mat-card-footer>
+</mat-card>
+<!-- <pre>{{ currencies$ | async | json }}</pre> -->
