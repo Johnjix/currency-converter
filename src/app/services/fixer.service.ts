@@ -48,10 +48,9 @@ export class FixerService implements IFixerService {
     amount: number,
     date?: string
   ): Observable<IConversionResponse> {
-    console.log('base url', this.baseUrl);
-    const apiUrl = `${this.baseUrl}convert?access_key=${this.API_KEY}&from=${from}&to=${to}&amount=${amount}`;
-    // +
-    // (date ? 'date=' + date : '');
+    const apiUrl =
+      `${this.baseUrl}convert?access_key=${this.API_KEY}&from=${from}&to=${to}&amount=${amount}` +
+      (date ? 'date=' + date : '');
 
     return this._httpService.get<IConversionResponse>(apiUrl);
   }

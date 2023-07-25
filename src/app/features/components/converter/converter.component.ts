@@ -1,9 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { ICurrency } from '../../../models/currency.model';
-import { Observable } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 import { FixerService } from '../../../services/fixer.service';
 import { ProgressBarMode } from '../../../models/progress-bar-mode.model';
 import {
@@ -12,6 +12,7 @@ import {
 } from '@ng-bootstrap/ng-bootstrap';
 import { CurrencySelectorComponent } from '../currency-selector/currency-selector.component';
 import { DatePickerComponent } from '../date-picker/date-picker.component';
+import { LoadingService } from 'src/app/services/loading.service';
 
 const modules = [
   CommonModule,
@@ -28,8 +29,8 @@ const components = [CurrencySelectorComponent, DatePickerComponent];
   templateUrl: './converter.component.html',
   styleUrls: ['./converter.component.scss'],
 })
-export class ConverterComponent implements OnInit {
-  loading: boolean;
+export class ConverterComponent implements OnInit, OnDestroy {
+  loading$: Observable<boolean>;
   progressBarMode: ProgressBarMode;
   currencies$: Observable<ICurrency>;
   date: string;
@@ -37,9 +38,13 @@ export class ConverterComponent implements OnInit {
   symbolLeft: string;
   amountRight: number;
   symbolRight: string;
+  sub: Subscription;
 
-  constructor(private _fixerService: FixerService) {
-    this.loading = false;
+  constructor(
+    private _fixerService: FixerService,
+    private _loadingService: LoadingService
+  ) {
+    this.loading$ = this._loadingService.getLoading();
     this.progressBarMode = 'determinate';
     this.currencies$ = this._fixerService.getSupportedSymbols();
     this.date = this.getCurrentDate();
@@ -47,13 +52,15 @@ export class ConverterComponent implements OnInit {
     this.symbolLeft = '';
     this.amountRight = 0;
     this.symbolRight = '';
+    this.sub = new Subscription();
   }
 
-  ngOnInit(): void {}
-
-  toggleLoading(): void {
-    this.loading = !this.loading;
-    this.progressBarMode = this.loading ? 'indeterminate' : 'determinate';
+  ngOnInit(): void {
+    this.loadingStatusInit();
+  }
+  ngOnDestroy(): void {
+    // Unsubscribe from observable to prevent memory leak
+    this.sub.unsubscribe();
   }
 
   private getCurrentDate(): string {
@@ -62,6 +69,15 @@ export class ConverterComponent implements OnInit {
     return `${todaysDate.getFullYear()}-${
       todaysDate.getMonth() + 1
     }-${todaysDate.getDate()}`;
+  }
+  private loadingStatusInit(): void {
+    this.sub = this.loading$.subscribe((loadingStatus) => {
+      loadingStatus
+        ? (this.progressBarMode = 'indeterminate')
+        : (this.progressBarMode = 'determinate');
+
+      console.log('loading', loadingStatus);
+    });
   }
 
   onDateChange(date: string): void {
@@ -74,11 +90,10 @@ export class ConverterComponent implements OnInit {
     amount: number,
     date?: string
   ): void {
-    console.log(from, to, amount, date);
     if (!from || !to || amount == 0) return;
 
     this._fixerService
-      .getConversion(from, to, amount, undefined)
+      .getConversion(from, to, amount, date)
       .subscribe((conversionResponse) =>
         this.setNewAmount(from, conversionResponse.result)
       );
