@@ -1,5 +1,4 @@
 import { Observable } from 'rxjs';
-import { ICurrency } from './currency.model';
 import { ICurrencyRateResponse } from './currency-rate-response.model';
 import { IConversionResponse } from './conversion-reponse.model';
 
@@ -15,31 +14,32 @@ export interface IFixerService {
     [...]
     }
    */
-  getSupportedSymbols(): Observable<ICurrency>;
+  getSupportedSymbols(): Observable<Record<string, string>>;
 
   /**
    * 
    * @param date Date of the rate.
    * @param baseCurrency Base currency symbol.
-   * @param targetCurrency target currency symbols, comma separated.
+   * @param symbols target currency symbols, comma separated.
    * 
-   * @example {
-    "success": true,
-    "historical": true,
-    "date": "2013-12-24",
-    "timestamp": 1387929599,
-    "base": "GBP",
-    "rates": {
-        "USD": 1.636492,
-        "EUR": 1.196476,
-        "CAD": 1.739516
+   * @example 
+   * {
+      "success": true,
+      "historical": true,
+      "date": "2013-12-24",
+      "timestamp": 1387929599,
+      "base": "GBP",
+      "rates": {
+          "USD": 1.636492,
+          "EUR": 1.196476,
+          "CAD": 1.739516
+      }
     }
-}
    */
   getHistoricalRates(
     date: string,
     baseCurrency: string,
-    targetCurrency: string
+    symbols: string
   ): Observable<ICurrencyRateResponse>;
 
   /**

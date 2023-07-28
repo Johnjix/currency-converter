@@ -5,7 +5,8 @@ import {
   NgbDropdownModule,
   NgbTooltipModule,
 } from '@ng-bootstrap/ng-bootstrap';
-import { ICurrency } from '../../../models/currency.model';
+import { Observable } from 'rxjs';
+import { FixerService } from '../../../services/fixer.service';
 
 @Component({
   selector: 'app-currency-selector',
@@ -15,23 +16,23 @@ import { ICurrency } from '../../../models/currency.model';
   styleUrls: ['./currency-selector.component.scss'],
 })
 export class CurrencySelectorComponent {
-  @Input() currencies: ICurrency;
   @Input() amount: number;
   @Output() amountChange: EventEmitter<number>;
   @Input() symbol: string;
   @Output() symbolChange: EventEmitter<string>;
   @Input() title: 'Base' | 'Target';
 
+  currencies$: Observable<Record<string, string>>;
   name: string;
 
-  constructor() {
-    this.currencies = {};
+  constructor(private _fixerService: FixerService) {
     this.symbol = '';
     this.name = '';
     this.amount = 0;
     this.title = 'Base';
     this.amountChange = new EventEmitter<number>();
     this.symbolChange = new EventEmitter<string>();
+    this.currencies$ = this._fixerService.getSupportedSymbols();
   }
 
   setCurrency(symbol: string, name: string): void {

@@ -2,8 +2,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
-import { ICurrency } from '../../../models/currency.model';
-import { Observable, Subscription } from 'rxjs';
+import { Observable, Subscription, delay } from 'rxjs';
 import { FixerService } from '../../../services/fixer.service';
 import { ProgressBarMode } from '../../../models/progress-bar-mode.model';
 import {
@@ -13,6 +12,7 @@ import {
 import { CurrencySelectorComponent } from '../currency-selector/currency-selector.component';
 import { DatePickerComponent } from '../date-picker/date-picker.component';
 import { LoadingService } from 'src/app/services/loading.service';
+import { CurrencySelectorMultiComponent } from '../currency-selector-multi/currency-selector-multi.component';
 
 const modules = [
   CommonModule,
@@ -21,7 +21,11 @@ const modules = [
   NgbDropdownModule,
   NgbTooltipModule,
 ];
-const components = [CurrencySelectorComponent, DatePickerComponent];
+const components = [
+  CurrencySelectorComponent,
+  DatePickerComponent,
+  CurrencySelectorMultiComponent,
+];
 @Component({
   selector: 'app-converter',
   standalone: true,
@@ -32,13 +36,12 @@ const components = [CurrencySelectorComponent, DatePickerComponent];
 export class ConverterComponent implements OnInit, OnDestroy {
   loading$: Observable<boolean>;
   progressBarMode: ProgressBarMode;
-  currencies$: Observable<ICurrency>;
   date: string;
-  amountLeft: number;
-  symbolLeft: string;
-  amountRight: number;
-  symbolRight: string;
+  baseAmount: number;
+  baseSymbol: string;
   sub: Subscription;
+  rates: Record<string, number>;
+  symbols: string;
 
   constructor(
     private _fixerService: FixerService,
@@ -46,12 +49,11 @@ export class ConverterComponent implements OnInit, OnDestroy {
   ) {
     this.loading$ = this._loadingService.getLoading();
     this.progressBarMode = 'determinate';
-    this.currencies$ = this._fixerService.getSupportedSymbols();
+    this.rates = {};
     this.date = this.getCurrentDate();
-    this.amountLeft = 0;
-    this.symbolLeft = '';
-    this.amountRight = 0;
-    this.symbolRight = '';
+    this.baseAmount = 0;
+    this.baseSymbol = '';
+    this.symbols = '';
     this.sub = new Subscription();
   }
 
@@ -67,7 +69,7 @@ export class ConverterComponent implements OnInit, OnDestroy {
     const todaysDate: Date = new Date();
 
     return `${todaysDate.getFullYear()}-${
-      todaysDate.getMonth() + 1
+      todaysDate.getMonth() + 1 // January = 0
     }-${todaysDate.getDate()}`;
   }
   private loadingStatusInit(): void {
@@ -75,8 +77,6 @@ export class ConverterComponent implements OnInit, OnDestroy {
       loadingStatus
         ? (this.progressBarMode = 'indeterminate')
         : (this.progressBarMode = 'determinate');
-
-      console.log('loading', loadingStatus);
     });
   }
 
@@ -84,23 +84,13 @@ export class ConverterComponent implements OnInit, OnDestroy {
     this.date = date;
   }
 
-  getCurrencyConversion(
-    from: string,
-    to: string,
-    amount: number,
-    date?: string
-  ): void {
-    if (!from || !to || amount == 0) return;
-
+  getConersionRates(): void {
     this._fixerService
-      .getConversion(from, to, amount, date)
-      .subscribe((conversionResponse) =>
-        this.setNewAmount(from, conversionResponse.result)
-      );
-  }
-  private setNewAmount(symbol: string, result: number): void {
-    symbol == this.symbolLeft
-      ? (this.amountLeft = result)
-      : (this.amountRight = result);
+      .getHistoricalRates(this.date, this.baseSymbol, this.symbols)
+      .subscribe((ratesResponse) => {
+        this.rates = ratesResponse.rates;
+
+        console.log('rates', this.rates);
+      });
   }
 }

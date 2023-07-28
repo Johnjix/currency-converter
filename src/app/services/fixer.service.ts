@@ -2,7 +2,6 @@ import { Injectable } from '@angular/core';
 import { Observable, map } from 'rxjs';
 import { ICurrencyResponse } from '../models/currency-response.model';
 import { HttpClient } from '@angular/common/http';
-import { ICurrency } from '../models/currency.model';
 import { IFixerService } from '../models/fixer-service.model';
 import { ICurrencyRateResponse } from '../models/currency-rate-response.model';
 import { IConversionResponse } from '../models/conversion-reponse.model';
@@ -24,7 +23,7 @@ export class FixerService implements IFixerService {
     this.baseUrl = 'http://data.fixer.io/api/';
   }
 
-  getSupportedSymbols(): Observable<ICurrency> {
+  getSupportedSymbols(): Observable<Record<string, string>> {
     const apiUrl = `${this.baseUrl}symbols?access_key=${this.API_KEY}`;
 
     return this._httpService
@@ -35,9 +34,9 @@ export class FixerService implements IFixerService {
   getHistoricalRates(
     date: string,
     baseCurrency: string,
-    targetCurrency: string
+    symbols: string
   ): Observable<ICurrencyRateResponse> {
-    const apiUrl = `${this.baseUrl}${date}?access_key=${this.API_KEY}&base=${baseCurrency}&symbols=${targetCurrency}`;
+    const apiUrl = `${this.baseUrl}${date}?access_key=${this.API_KEY}&base=${baseCurrency}&symbols=${symbols}`;
 
     return this._httpService.get<ICurrencyRateResponse>(apiUrl);
   }

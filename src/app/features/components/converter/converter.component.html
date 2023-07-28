@@ -15,31 +15,17 @@
     <div class="row mb-2">
       <div class="col d-flex justify-content-between">
         <app-currency-selector
-          [currencies]="(currencies$ | async) ?? {}"
-          [(symbol)]="symbolLeft"
-          (symbolChange)="
-            getCurrencyConversion(symbolLeft, symbolRight, amountLeft, date)
-          "
-          [(amount)]="amountLeft"
-          (amountChange)="
-            getCurrencyConversion(symbolLeft, symbolRight, amountLeft, date)
-          "
+          [(symbol)]="baseSymbol"
+          [(amount)]="baseAmount"
         ></app-currency-selector>
         <div class="d-flex align-items-center">
           <i class="fa-solid fa-left-right fa-2xl"></i>
         </div>
-        <app-currency-selector
-          [currencies]="(currencies$ | async) ?? {}"
-          [title]="'Target'"
-          [(symbol)]="symbolRight"
-          (symbolChange)="
-            getCurrencyConversion(symbolRight, symbolLeft, amountLeft, date)
-          "
-          [(amount)]="amountRight"
-          (amountChange)="
-            getCurrencyConversion(symbolRight, symbolLeft, amountLeft, date)
-          "
-        ></app-currency-selector>
+        <app-currency-selector-multi
+          [(symbols)]="symbols"
+          (symbolsChange)="getConersionRates()"
+        ></app-currency-selector-multi>
+        {{ symbols }}
       </div>
     </div>
   </mat-card-content>
@@ -48,3 +34,4 @@
   </mat-card-footer>
 </mat-card>
 <!-- <pre>{{ currencies$ | async | json }}</pre> -->
+<!-- <pre>{{ rates | json }}</pre> -->

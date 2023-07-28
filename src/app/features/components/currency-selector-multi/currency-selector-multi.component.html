@@ -1,0 +1,19 @@
+<div ngbDropdown class="d-inline-block">
+  <button
+    type="button"
+    class="btn btn-outline-primary"
+    id="dropdownForm1"
+    ngbDropdownToggle
+  >
+    Convert To:
+  </button>
+  <div ngbDropdownMenu aria-labelledby="dropdownForm1">
+    <ng-container *ngFor="let cur of currenciesSelectable | keyvalue">
+      <mat-checkbox
+        [(ngModel)]="currenciesSelectable[cur.key]"
+        (ngModelChange)="emitSelectedAsSymbols()"
+        >{{ cur.key }}</mat-checkbox
+      >
+    </ng-container>
+  </div>
+</div>

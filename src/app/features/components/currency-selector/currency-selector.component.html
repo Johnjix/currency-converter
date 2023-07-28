@@ -11,7 +11,7 @@
   </button>
   <div ngbDropdownMenu>
     <button
-      *ngFor="let cur of currencies | keyvalue"
+      *ngFor="let cur of currencies$ | async | keyvalue"
       ngbDropdownItem
       (click)="setCurrency(cur.key, cur.value)"
     >
